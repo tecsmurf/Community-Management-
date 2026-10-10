@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% from "macros.html" import yuvak_badge with context %}
+{% block title %}{{ f.family_name }} family{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1>{{ f.family_name }} family <span class="code">{{ f.code }}</span></h1>
+  <div class="actions no-print">
+    <a class="btn" href="{{ url_for('families.family_tree', family_id=f.id) }}">Family tree</a>
+    <a class="btn" href="javascript:window.print()">Print</a>
+    <a class="btn" href="{{ url_for('families.edit', family_id=f.id) }}">Edit family</a>
+    <a class="btn primary" href="{{ url_for('members.new', family=f.id) }}">+ Add member</a>
+  </div>
+</div>
+
+<section class="card">
+  <dl class="inline">
+    <dt>Family ID</dt><dd class="code">{{ f.code }}</dd>
+    <dt>Address</dt><dd>{{ f.address or '—' }}</dd>
+    <dt>Area</dt><dd>{{ f.area or '—' }}</dd>
+    <dt>City</dt><dd>{{ f.city or '—' }}{% if f.pincode %} – {{ f.pincode }}{% endif %}</dd>
+    <dt>Phone</dt><dd>{{ f.phone or '—' }}</dd>
+    <dt>Native place</dt><dd>{{ f.native_place or '—' }}</dd>
+    {% if f.notes %}<dt>Notes</dt><dd class="pre">{{ f.notes }}</dd>{% endif %}
+  </dl>
+</section>
+
+<section class="card">
+  <h2>Members ({{ members|length }})</h2>
+  {% if members %}
+  <table>
+    <thead><tr><th>ID</th><th>Name</th><th>Relation</th><th>Age</th><th>Profession</th><th>Phone</th><th></th></tr></thead>
+    <tbody>
+    {% for m in members %}
+      <tr class="{{ 'late' if m.is_deceased }}">
+        <td class="code">{{ m.code }}</td>
+        <td><a href="{{ url_for('members.view', member_id=m.id) }}">{{ m.name }}</a>{% if m.id == f.head_member_id %} <span class="badge">Head</span>{% endif %}</td>
+        <td>{{ m.relation_to_head or '' }}</td>
+        <td>{{ m.age if m.age is not none }}</td>
+        <td>{{ m.profession or '' }}</td>
+        <td>{{ m.phone or '' }}</td>
+        <td>{{ yuvak_badge(m) }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="empty">No members in this family yet. <a href="{{ url_for('members.new', family=f.id) }}">Add the first one</a>.</p>
+  <form method="post" action="{{ url_for('families.delete', family_id=f.id) }}" class="no-print"
+        onsubmit="return confirm('Delete this family?');">
+    <button class="btn danger">Delete family</button>
+  </form>
+  {% endif %}
+</section>
+{% endblock %}

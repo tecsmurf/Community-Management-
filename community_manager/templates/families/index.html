@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% from "macros.html" import pager with context %}
+{% block title %}Families{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1>Families <span class="count">{{ total }}</span></h1>
+  <div class="actions"><a class="btn primary" href="{{ url_for('families.new') }}">+ New family</a></div>
+</div>
+
+<form class="filters card" method="get">
+  <input type="search" name="q" value="{{ q }}" placeholder="Family name, family ID, address, phone">
+  <select name="area">
+    <option value="">All areas</option>
+    {% for a in areas %}<option {{ 'selected' if a == area }}>{{ a }}</option>{% endfor %}
+  </select>
+  <button class="btn">Filter</button>
+  <a href="{{ url_for('families.index') }}">Clear</a>
+</form>
+
+<section class="card">
+  {% if families %}
+  <table>
+    <thead><tr><th>Family ID</th><th>Family</th><th>Head</th><th>Area</th><th>Phone</th><th>Members</th></tr></thead>
+    <tbody>
+    {% for f in families %}
+      <tr>
+        <td class="code">{{ f.code }}</td>
+        <td><a href="{{ url_for('families.view', family_id=f.id) }}">{{ f.family_name }}</a></td>
+        <td>{{ f.head_name or '' }}</td>
+        <td>{{ f.area or '' }}</td>
+        <td>{{ f.phone or '' }}</td>
+        <td>{{ f.member_count }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {{ pager(page, pages) }}
+  {% else %}
+  <p class="empty">No families yet. <a href="{{ url_for('families.new') }}">Create one</a>.</p>
+  {% endif %}
+</section>
+{% endblock %}
