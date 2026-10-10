@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% from "macros.html" import tree_node with context %}
+{% block title %}{{ title }}{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1>{{ title }}</h1>
+  <div class="actions no-print">
+    <a class="btn" href="{{ back }}">Back</a>
+    <a class="btn" href="javascript:window.print()">Print</a>
+  </div>
+</div>
+<p class="hint no-print">Built from each person's father, mother and husband/wife. Click a name to open their details. Blue = male, pink = female, grey = late.</p>
+<section class="card tree-wrap">
+  {% if roots %}
+  <div class="tree">
+    <ul>{% for node in roots %}{{ tree_node(node, highlight) }}{% endfor %}</ul>
+  </div>
+  {% else %}
+  <p class="empty">No members to show yet.</p>
+  {% endif %}
+</section>
+{% endblock %}

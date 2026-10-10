@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% from "macros.html" import yuvak_badge with context %}
+{% block title %}Home{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1>Jai Jinendra</h1>
+  <div class="actions">
+    <a class="btn" href="{{ url_for('families.new') }}">+ New family</a>
+    <a class="btn primary" href="{{ url_for('members.new') }}">+ New member</a>
+  </div>
+</div>
+
+<section class="stats">
+  <a class="stat" href="{{ url_for('members.index', deceased='0') }}"><b>{{ stats.members }}</b><span>Members</span></a>
+  <a class="stat" href="{{ url_for('families.index') }}"><b>{{ stats.families }}</b><span>Families</span></a>
+  <a class="stat" href="{{ url_for('members.index', gender='M', deceased='0') }}"><b>{{ stats.male }}</b><span>Male</span></a>
+  <a class="stat" href="{{ url_for('members.index', gender='F', deceased='0') }}"><b>{{ stats.female }}</b><span>Female</span></a>
+  <a class="stat accent" href="{{ url_for('yuvak.index', tab='active') }}"><b>{{ stats.yuvak_active }}</b><span>Yuvak Mandal</span></a>
+  <a class="stat" href="{{ url_for('yuvak.index', tab='alumni') }}"><b>{{ stats.yuvak_alumni }}</b><span>Yuvak alumni</span></a>
+</section>
+
+<section class="card">
+  <h2>Recently added</h2>
+  {% if recent %}
+  <table>
+    <thead><tr><th>ID</th><th>Name</th><th>Family</th><th>Age</th><th></th></tr></thead>
+    <tbody>
+    {% for m in recent %}
+      <tr>
+        <td class="code">{{ m.code }}</td>
+        <td><a href="{{ url_for('members.view', member_id=m.id) }}">{{ m.name }}</a></td>
+        <td>{% if m.family_id %}<a href="{{ url_for('families.view', family_id=m.family_id) }}">{{ m.family_name }}</a>{% endif %}</td>
+        <td>{{ m.age if m.age is not none }}</td>
+        <td>{{ yuvak_badge(m) }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="empty">
+    <p>No members yet. Start by creating a family, then add each person in it.</p>
+    <a class="btn primary" href="{{ url_for('families.new') }}">Create the first family</a>
+  </div>
+  {% endif %}
+</section>
+{% endblock %}

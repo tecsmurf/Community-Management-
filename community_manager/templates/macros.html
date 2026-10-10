@@ -1,0 +1,41 @@
+{% macro yuvak_badge(m) -%}
+  {% if m.yuvak_status == 'Active' %}<span class="badge active" title="{{ cfg.YUVAK_MANDAL_NAME }}">Yuvak {{ m.yuvak_code }}</span>
+  {% elif m.yuvak_status == 'Alumni' %}<span class="badge alumni" title="{{ cfg.YUVAK_MANDAL_NAME }} alumni">Alumni {{ m.yuvak_code }}</span>{% endif %}
+  {%- if m.is_deceased %} <span class="badge muted">Late</span>{% endif %}
+{%- endmacro %}
+
+{% macro pager(page, pages) -%}
+  {% if pages > 1 %}
+  <nav class="pager">
+    {% set args = request.args.to_dict() %}
+    {% if page > 1 %}{% set _ = args.update(page=page - 1) %}<a href="?{{ args|urlencode }}">‹ Previous</a>{% endif %}
+    <span>Page {{ page }} of {{ pages }}</span>
+    {% if page < pages %}{% set _ = args.update(page=page + 1) %}<a href="?{{ args|urlencode }}">Next ›</a>{% endif %}
+  </nav>
+  {% endif %}
+{%- endmacro %}
+
+{% macro member_link(m) -%}
+  {% if m %}<a href="{{ url_for('members.view', member_id=m.id) }}">{{ m.name }}</a> <span class="code">{{ m.code }}</span>{% else %}<span class="muted">Not recorded</span>{% endif %}
+{%- endmacro %}
+
+{% macro tree_node(node, highlight) -%}
+  <li>
+    <div class="couple">
+      {{ person_card(node.person, highlight) }}
+      {% if node.spouse %}<span class="tie">♥</span>{{ person_card(node.spouse, highlight) }}{% endif %}
+    </div>
+    {% if node.children %}
+      <ul>{% for child in node.children %}{{ tree_node(child, highlight) }}{% endfor %}</ul>
+    {% endif %}
+  </li>
+{%- endmacro %}
+
+{% macro person_card(p, highlight) -%}
+  <a class="person g-{{ p.gender }} {{ 'me' if p.id == highlight }} {{ 'late' if p.is_deceased }}"
+     href="{{ url_for('members.view', member_id=p.id) }}">
+    <strong>{{ p.name }}</strong>
+    <small>{{ p.code }}{% if p.age is not none %} · {{ p.age }} yrs{% endif %}{% if p.is_deceased %} · Late{% endif %}</small>
+    {% if p.family_name %}<small class="fam">{{ p.family_name }} {{ p.family_code }}</small>{% endif %}
+  </a>
+{%- endmacro %}

@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% set m = member %}
+{% block title %}{{ 'Edit ' ~ m.code if m.id else 'New member' }}{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1>{% if m.id %}Edit {{ m.name or 'member' }} <span class="code">{{ m.code }}</span>{% else %}New member{% endif %}</h1>
+</div>
+
+<datalist id="members-male">{% for c in member_choices if c.gender != 'F' and c.id != m.id %}<option value="{{ c.label }}">{% endfor %}</datalist>
+<datalist id="members-female">{% for c in member_choices if c.gender != 'M' and c.id != m.id %}<option value="{{ c.label }}">{% endfor %}</datalist>
+<datalist id="members-all">{% for c in member_choices if c.id != m.id %}<option value="{{ c.label }}">{% endfor %}</datalist>
+<datalist id="families">{% for c in family_choices %}<option value="{{ c.label }}">{% endfor %}</datalist>
+<datalist id="areas">{% for a in areas %}<option value="{{ a }}">{% endfor %}</datalist>
+<datalist id="professions">{% for p in professions %}<option value="{{ p }}">{% endfor %}</datalist>
+
+<form method="post" class="card form">
+  {% if m.id %}<input type="hidden" name="id" value="{{ m.id }}">{% endif %}
+
+  <fieldset>
+    <legend>Personal details</legend>
+    <div class="grid">
+      <label>First name *<input name="first_name" value="{{ m.first_name or '' }}" required autofocus></label>
+      <label>Middle name / Father's name<input name="middle_name" value="{{ m.middle_name or '' }}"></label>
+      <label>Surname<input name="last_name" value="{{ m.last_name or '' }}"></label>
+      <label>Gender *
+        <select name="gender" required>
+          <option value="">Choose…</option>
+          {% for k, v in genders.items() %}<option value="{{ k }}" {{ 'selected' if m.gender == k }}>{{ v }}</option>{% endfor %}
+        </select>
+      </label>
+      <label>Date of birth<input type="date" name="dob" value="{{ m.dob or '' }}" max="{{ today.isoformat() }}"></label>
+      <label>Marital status
+        <select name="marital_status">
+          <option value=""></option>
+          {% for s in marital_statuses %}<option {{ 'selected' if m.marital_status == s }}>{{ s }}</option>{% endfor %}
+        </select>
+      </label>
+      <label>Blood group
+        <select name="blood_group">
+          <option value=""></option>
+          {% for b in blood_groups %}<option {{ 'selected' if m.blood_group == b }}>{{ b }}</option>{% endfor %}
+        </select>
+      </label>
+      <label>Profession<input name="profession" list="professions" value="{{ m.profession or '' }}"></label>
+      <label>Education<input name="education" value="{{ m.education or '' }}"></label>
+    </div>
+    <label class="check"><input type="checkbox" name="is_deceased" value="1" {{ 'checked' if m.is_deceased }}> This person has passed away</label>
+  </fieldset>
+
+  <fieldset>
+    <legend>Family</legend>
+    <p class="hint">Start typing a name or ID and pick from the list. Parents and spouse are used to draw the family tree.</p>
+    <div class="grid">
+      <label>Family<input name="family_id" list="families" value="{{ m.family_id_label or '' }}" placeholder="e.g. {{ cfg.FAMILY_PREFIX }}-0001"></label>
+      <label>Relation to head of family
+        <select name="relation_to_head">
+          <option value=""></option>
+          {% for r in relations %}<option {{ 'selected' if m.relation_to_head == r }}>{{ r }}</option>{% endfor %}
+        </select>
+      </label>
+      <label>Father<input name="father_id" list="members-male" value="{{ m.father_id_label or '' }}"></label>
+      <label>Mother<input name="mother_id" list="members-female" value="{{ m.mother_id_label or '' }}"></label>
+      <label>Husband / Wife<input name="spouse_id" list="members-all" value="{{ m.spouse_id_label or '' }}"></label>
+    </div>
+    <p class="hint"><a href="{{ url_for('families.new') }}" target="_blank">Create a new family</a> if theirs is not in the list yet.</p>
+  </fieldset>
+
+  <fieldset>
+    <legend>Contact &amp; address</legend>
+    <p class="hint">Leave the address blank if it is the same as the family's address.</p>
+    <div class="grid">
+      <label>Mobile<input name="phone" type="tel" value="{{ m.phone or '' }}"></label>
+      <label>Email<input name="email" type="email" value="{{ m.email or '' }}"></label>
+      <label class="wide">Address<textarea name="address" rows="2">{{ m.address or '' }}</textarea></label>
+      <label>Area<input name="area" list="areas" value="{{ m.area or '' }}"></label>
+      <label>City<input name="city" value="{{ m.city or '' }}"></label>
+    </div>
+  </fieldset>
+
+  <fieldset>
+    <legend>{{ cfg.YUVAK_MANDAL_NAME }}</legend>
+    {% if m.yuvak_no %}
+      <p>Yuvak Mandal ID: <b class="code">{{ cfg.YUVAK_PREFIX }}-{{ '%0*d' % (cfg.YUVAK_ID_WIDTH, m.yuvak_no) }}</b></p>
+    {% else %}
+      <p class="hint">Males aged {{ cfg.YUVAK_MIN_AGE }} to {{ cfg.YUVAK_MAX_AGE }} get a Yuvak Mandal ID automatically and become alumni after {{ cfg.YUVAK_MAX_AGE }}.</p>
+      <label class="check"><input type="checkbox" name="former_yuvak" value="1"> Was a Yuvak Mandal member in the past (give an ID now, shown as alumni)</label>
+    {% endif %}
+  </fieldset>
+
+  <label class="wide">Notes<textarea name="notes" rows="3">{{ m.notes or '' }}</textarea></label>
+
+  <div class="form-actions">
+    <button class="btn primary" name="next" value="view">Save</button>
+    {% if not m.id %}<button class="btn" name="next" value="another">Save and add another to this family</button>{% endif %}
+    <a href="{{ url_for('members.view', member_id=m.id) if m.id else url_for('members.index') }}">Cancel</a>
+  </div>
+</form>
+{% endblock %}

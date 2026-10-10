@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% set f = family %}
+{% block title %}{{ 'Edit ' ~ f.code if f.id else 'New family' }}{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1>{% if f.id %}Edit {{ f.family_name }} family <span class="code">{{ f.code }}</span>{% else %}New family{% endif %}</h1>
+</div>
+
+<datalist id="areas">{% for a in areas %}<option value="{{ a }}">{% endfor %}</datalist>
+<datalist id="family-members">{% for m in members %}<option value="{{ m.code }} | {{ m.name }}">{% endfor %}</datalist>
+
+<form method="post" class="card form">
+  <div class="grid">
+    <label>Family name (surname) *<input name="family_name" value="{{ f.family_name or '' }}" required autofocus></label>
+    {% if f.id %}
+    <label>Head of family<input name="head_member_id" list="family-members" value="{{ f.head_member_id or '' }}"></label>
+    {% endif %}
+    <label>Phone<input name="phone" type="tel" value="{{ f.phone or '' }}"></label>
+    <label class="wide">Address<textarea name="address" rows="2">{{ f.address or '' }}</textarea></label>
+    <label>Area<input name="area" list="areas" value="{{ f.area or '' }}"></label>
+    <label>City<input name="city" value="{{ f.city or '' }}"></label>
+    <label>PIN code<input name="pincode" value="{{ f.pincode or '' }}"></label>
+    <label>Native place<input name="native_place" value="{{ f.native_place or '' }}"></label>
+    <label class="wide">Notes<textarea name="notes" rows="3">{{ f.notes or '' }}</textarea></label>
+  </div>
+  {% if not f.id %}<p class="hint">After saving, add the head of family and the other members. The head is set automatically when you choose "Self (Head)" as their relation.</p>{% endif %}
+  <div class="form-actions">
+    <button class="btn primary">Save</button>
+    <a href="{{ url_for('families.view', family_id=f.id) if f.id else url_for('families.index') }}">Cancel</a>
+  </div>
+</form>
+{% endblock %}
