@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Backup{% endblock %}
+{% block content %}
+<div class="page-head"><h1>Backup &amp; restore</h1></div>
+
+<section class="card">
+  <h2>Save a backup</h2>
+  <p>Download a copy of all data and keep it on a pen drive or in Google Drive. Do this regularly.</p>
+  <a class="btn primary" href="{{ url_for('main.backup_download') }}">Download backup</a>
+  <a class="btn" href="{{ url_for('main.export_members') }}">Export all members to Excel (CSV)</a>
+</section>
+
+<section class="card">
+  <h2>Automatic backups</h2>
+  <p>A copy is saved automatically every time the app starts. The latest {{ cfg.BACKUPS_TO_KEEP }} are kept.</p>
+  <p class="hint">Data file: <code>{{ db_path }}</code></p>
+  {% if backups %}
+  <ul class="plain">{% for b in backups[:5] %}<li><code>{{ b }}</code></li>{% endfor %}</ul>
+  {% endif %}
+</section>
+
+<section class="card">
+  <h2>Restore from a backup</h2>
+  <p class="warn">This replaces all current data with the backup. The current data is saved to the automatic backups first.</p>
+  <form method="post" action="{{ url_for('main.backup_restore') }}" enctype="multipart/form-data"
+        onsubmit="return confirm('Replace all current data with this backup?');">
+    <input type="file" name="file" accept=".db" required>
+    <button class="btn danger">Restore</button>
+  </form>
+</section>
+{% endblock %}

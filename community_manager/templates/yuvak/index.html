@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}{{ cfg.YUVAK_MANDAL_NAME }}{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1>{{ cfg.YUVAK_MANDAL_NAME }}</h1>
+  <div class="actions no-print">
+    {% if tab != 'upcoming' %}<a class="btn" href="{{ url_for('main.export_members', yuvak=tab) }}">Export to Excel (CSV)</a>{% endif %}
+    <a class="btn" href="javascript:window.print()">Print</a>
+  </div>
+</div>
+<p class="hint">Every male member aged {{ cfg.YUVAK_MIN_AGE }} to {{ cfg.YUVAK_MAX_AGE }} gets a Yuvak Mandal ID automatically. After {{ cfg.YUVAK_MAX_AGE }} they keep their ID and are listed as alumni.</p>
+
+<nav class="tabs no-print">
+  <a class="{{ 'on' if tab == 'active' }}" href="{{ url_for('yuvak.index', tab='active') }}">Active ({{ counts.active }})</a>
+  <a class="{{ 'on' if tab == 'alumni' }}" href="{{ url_for('yuvak.index', tab='alumni') }}">Alumni ({{ counts.alumni }})</a>
+  <a class="{{ 'on' if tab == 'upcoming' }}" href="{{ url_for('yuvak.index', tab='upcoming') }}">Coming up this year</a>
+</nav>
+
+<section class="card">
+  {% if tab != 'upcoming' %}
+  <form class="filters no-print" method="get">
+    <input type="hidden" name="tab" value="{{ tab }}">
+    <input type="search" name="q" value="{{ q }}" placeholder="Name, {{ cfg.YUVAK_PREFIX }} ID, phone">
+    <button class="btn">Search</button>
+  </form>
+  {% endif %}
+  {% if rows %}
+  <table>
+    <thead><tr>
+      <th>Yuvak ID</th><th>Name</th><th>Age</th><th>Member ID</th><th>Family</th><th>Phone</th>
+      {% if tab == 'alumni' %}<th>Alumni since</th>{% elif tab == 'upcoming' %}<th>What happens</th><th>On</th>{% else %}<th>Registered</th>{% endif %}
+    </tr></thead>
+    <tbody>
+    {% for m in rows %}
+      <tr class="{{ 'late' if m.is_deceased }}">
+        <td class="code">{{ m.yuvak_code or '—' }}</td>
+        <td><a href="{{ url_for('members.view', member_id=m.id) }}">{{ m.name }}</a>{% if m.is_deceased %} <span class="badge muted">Late</span>{% endif %}</td>
+        <td>{{ m.age if m.age is not none }}</td>
+        <td class="code">{{ m.code }}</td>
+        <td>{% if m.family_id %}<a href="{{ url_for('families.view', family_id=m.family_id) }}">{{ m.family_name }}</a>{% endif %}</td>
+        <td>{{ m.phone or '' }}</td>
+        {% if tab == 'alumni' %}<td>{{ m.alumni_since or '' }}</td>
+        {% elif tab == 'upcoming' %}<td>{{ m.event }}</td><td>{{ m.event_date }}</td>
+        {% else %}<td>{{ m.yuvak_joined_on or '' }}</td>{% endif %}
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="empty">Nobody here yet.</p>
+  {% endif %}
+</section>
+{% endblock %}

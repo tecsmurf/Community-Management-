@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% from "macros.html" import yuvak_badge, member_link with context %}
+{% block title %}{{ m.name }}{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1>{{ m.name }} <span class="code">{{ m.code }}</span> {{ yuvak_badge(m) }}</h1>
+  <div class="actions no-print">
+    <a class="btn" href="{{ url_for('members.family_tree', member_id=m.id) }}">Family tree</a>
+    <a class="btn" href="javascript:window.print()">Print</a>
+    <a class="btn primary" href="{{ url_for('members.edit', member_id=m.id) }}">Edit</a>
+  </div>
+</div>
+
+<div class="cols">
+  <section class="card">
+    <h2>Details</h2>
+    <dl>
+      <dt>Member ID</dt><dd class="code">{{ m.code }}</dd>
+      <dt>Gender</dt><dd>{{ m.gender_label }}</dd>
+      <dt>Date of birth</dt><dd>{{ m.dob or '—' }}{% if m.age is not none %} ({{ m.age }} years){% endif %}</dd>
+      <dt>Marital status</dt><dd>{{ m.marital_status or '—' }}</dd>
+      <dt>Profession</dt><dd>{{ m.profession or '—' }}</dd>
+      <dt>Education</dt><dd>{{ m.education or '—' }}</dd>
+      <dt>Blood group</dt><dd>{{ m.blood_group or '—' }}</dd>
+      <dt>Mobile</dt><dd>{{ m.phone or '—' }}</dd>
+      <dt>Email</dt><dd>{{ m.email or '—' }}</dd>
+      <dt>Address</dt><dd>{{ m.display_address or '—' }}</dd>
+      <dt>Area</dt><dd>{{ m.display_area or '—' }}</dd>
+      <dt>City</dt><dd>{{ m.display_city or '—' }}</dd>
+      {% if m.notes %}<dt>Notes</dt><dd class="pre">{{ m.notes }}</dd>{% endif %}
+    </dl>
+  </section>
+
+  <div>
+    <section class="card">
+      <h2>Family</h2>
+      <dl>
+        <dt>Family</dt>
+        <dd>{% if m.family_id %}<a href="{{ url_for('families.view', family_id=m.family_id) }}">{{ m.family_name }}</a> <span class="code">{{ m.family_code }}</span>{% else %}—{% endif %}</dd>
+        <dt>Relation to head</dt><dd>{{ m.relation_to_head or '—' }}</dd>
+        <dt>Father</dt><dd>{{ member_link(father) }}</dd>
+        <dt>Mother</dt><dd>{{ member_link(mother) }}</dd>
+        <dt>{{ 'Wife' if m.gender == 'M' else 'Husband' if m.gender == 'F' else 'Spouse' }}</dt><dd>{{ member_link(spouse) }}</dd>
+        <dt>Children</dt>
+        <dd>{% for c in children %}{{ member_link(c) }}{% if not loop.last %}<br>{% endif %}{% else %}—{% endfor %}</dd>
+        <dt>Brothers &amp; sisters</dt>
+        <dd>{% for s in siblings %}{{ member_link(s) }}{% if not loop.last %}<br>{% endif %}{% else %}—{% endfor %}</dd>
+      </dl>
+      <p class="no-print">
+        <a href="{{ url_for('members.new', **({'father_id': m.id} if m.gender == 'M' else {'mother_id': m.id})) }}">+ Add a child</a>
+      </p>
+    </section>
+
+    <section class="card">
+      <h2>{{ cfg.YUVAK_MANDAL_NAME }}</h2>
+      {% if m.yuvak_status == 'Active' %}
+        <p>Active member, ID <b class="code">{{ m.yuvak_code }}</b>{% if m.yuvak_joined_on %}, registered on {{ m.yuvak_joined_on }}{% endif %}.</p>
+      {% elif m.yuvak_status == 'Alumni' %}
+        <p>Alumni, ID <b class="code">{{ m.yuvak_code }}</b>{% if m.alumni_since %}, alumni since {{ m.alumni_since }}{% endif %}.</p>
+      {% elif m.gender == 'M' and m.age is not none and m.age < cfg.YUVAK_MIN_AGE %}
+        <p class="muted">Will join automatically at age {{ cfg.YUVAK_MIN_AGE }}.</p>
+      {% elif m.gender == 'M' and not m.dob %}
+        <p class="muted">Add a date of birth to work out Yuvak Mandal membership.</p>
+      {% elif m.gender == 'M' and m.age is not none and m.age > cfg.YUVAK_MAX_AGE %}
+        <p class="muted">Over {{ cfg.YUVAK_MAX_AGE }}. If he was in the Yuvak Mandal before, open Edit and tick
+          "Was a Yuvak Mandal member in the past" to list him as alumni.</p>
+      {% else %}
+        <p class="muted">Not a member.</p>
+      {% endif %}
+    </section>
+
+    <form method="post" action="{{ url_for('members.delete', member_id=m.id) }}" class="no-print"
+          onsubmit="return confirm('Delete this member permanently? Links to their parents, spouse and children will be removed.');">
+      <button class="btn danger">Delete member</button>
+    </form>
+  </div>
+</div>
+{% endblock %}
