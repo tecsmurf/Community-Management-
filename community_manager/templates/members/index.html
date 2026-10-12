@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% from "macros.html" import yuvak_badge, pager with context %}
+{% block title %}Members{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1>Members <span class="count">{{ total }}</span></h1>
+  <div class="actions">
+    <a class="btn" href="{{ url_for('main.export_members', **request.args) }}">Export to Excel (CSV)</a>
+    <a class="btn primary" href="{{ url_for('members.new') }}">+ New member</a>
+  </div>
+</div>
+
+<form class="filters card" method="get">
+  <input type="search" name="q" value="{{ flt.q }}" placeholder="Name, member ID, phone, profession">
+  <select name="area">
+    <option value="">All areas</option>
+    {% for a in areas %}<option {{ 'selected' if a == flt.area }}>{{ a }}</option>{% endfor %}
+  </select>
+  <select name="gender">
+    <option value="">Any gender</option>
+    {% for k, v in genders.items() %}<option value="{{ k }}" {{ 'selected' if k == flt.gender }}>{{ v }}</option>{% endfor %}
+  </select>
+  <select name="yuvak">
+    <option value="">Yuvak Mandal: any</option>
+    <option value="active" {{ 'selected' if flt.yuvak == 'active' }}>Active Yuvak</option>
+    <option value="alumni" {{ 'selected' if flt.yuvak == 'alumni' }}>Alumni</option>
+  </select>
+  <input type="text" name="profession" value="{{ flt.profession }}" placeholder="Profession">
+  <select name="deceased">
+    <option value="1" {{ 'selected' if flt.include_deceased }}>Include late members</option>
+    <option value="0" {{ 'selected' if not flt.include_deceased }}>Living only</option>
+  </select>
+  <select name="order">
+    <option value="name" {{ 'selected' if order == 'name' }}>Sort by name</option>
+    <option value="id" {{ 'selected' if order == 'id' }}>Sort by member ID</option>
+    <option value="family" {{ 'selected' if order == 'family' }}>Sort by family</option>
+    <option value="age" {{ 'selected' if order == 'age' }}>Sort by age (eldest first)</option>
+  </select>
+  <button class="btn">Filter</button>
+  <a href="{{ url_for('members.index') }}">Clear</a>
+</form>
+
+<section class="card">
+  {% if members %}
+  <table>
+    <thead><tr><th>ID</th><th>Name</th><th>Age</th><th>Family</th><th>Area</th><th>Profession</th><th>Phone</th><th></th></tr></thead>
+    <tbody>
+    {% for m in members %}
+      <tr class="{{ 'late' if m.is_deceased }}">
+        <td class="code">{{ m.code }}</td>
+        <td><a href="{{ url_for('members.view', member_id=m.id) }}">{{ m.name }}</a> <small class="muted">{{ m.gender_label }}</small></td>
+        <td>{{ m.age if m.age is not none }}</td>
+        <td>{% if m.family_id %}<a href="{{ url_for('families.view', family_id=m.family_id) }}">{{ m.family_name }}</a> <span class="code">{{ m.family_code }}</span>{% endif %}</td>
+        <td>{{ m.display_area or '' }}</td>
+        <td>{{ m.profession or '' }}</td>
+        <td>{{ m.phone or '' }}</td>
+        <td>{{ yuvak_badge(m) }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {{ pager(page, pages) }}
+  {% else %}
+  <p class="empty">No members match.</p>
+  {% endif %}
+</section>
+{% endblock %}
