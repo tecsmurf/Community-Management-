@@ -18,7 +18,19 @@ def dashboard():
     conn = db.get_db()
     recent = conn.execute(f"{people.MEMBER_SELECT} ORDER BY m.id DESC LIMIT 8").fetchall()
     return render_template("dashboard.html", stats=people.stats(conn),
-                           recent=[people.decorate(r) for r in recent])
+                           recent=[people.decorate(r) for r in recent],
+                           birthdays=people.upcoming_birthdays(conn, days=30)[:12],
+                           areas=people.area_counts(conn)[:10])
+
+
+@bp.route("/help")
+def help_page():
+    return render_template("help.html")
+
+
+@bp.app_errorhandler(404)
+def not_found(_exc):
+    return render_template("404.html"), 404
 
 
 @bp.route("/search")

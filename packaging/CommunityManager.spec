@@ -21,6 +21,6 @@ exe = EXE(
     exclude_binaries=True,
     name="CommunityManager",
     console=True,  # the window shows the app is running; closing it stops the app
-    icon=None,
+    icon=str(root / "packaging" / "app.ico"),
 )
 coll = COLLECT(exe, a.binaries, a.datas, name="CommunityManager")

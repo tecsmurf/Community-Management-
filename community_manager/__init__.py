@@ -9,7 +9,7 @@ from flask import Flask
 from . import config, db
 from .services import people
 
-__version__ = "1.0.0"
+__version__ = "1.1.0"
 
 
 def create_app(test_config=None):
@@ -43,7 +43,7 @@ def create_app(test_config=None):
     @app.context_processor
     def globals_for_templates():
         return {"cfg": config, "today": date.today(), "app_version": __version__,
-                "genders": people.GENDERS}
+                "genders": people.GENDERS, "demo_mode": app.config.get("DEMO", False)}
 
     @app.before_request
     def daily_yuvak_sync():

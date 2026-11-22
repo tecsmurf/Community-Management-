@@ -9,7 +9,7 @@ import threading
 import time
 import webbrowser
 
-from community_manager import config, create_app
+from community_manager import __version__, config, create_app
 
 PREFERRED_PORT = 5055
 
@@ -40,11 +40,30 @@ def main():
         return
     port = pick_port(port)
     url = f"http://127.0.0.1:{port}/"
-    app = create_app()
+    demo = "--demo" in sys.argv
+    if demo:
+        # Separate folder so sample data never mixes with real records.
+        os.environ["COMMUNITY_DATA_DIR"] = str(config.data_dir() / "demo")
+    app = create_app({"DEMO": demo})
+    if demo:
+        from community_manager import db as database
+        from community_manager.demo import load
+        conn = database.connect(app.config["DATABASE"])
+        try:
+            load(conn)
+        finally:
+            conn.close()
 
-    print(f"{config.APP_NAME} is running at {url}")
-    print(f"Data folder: {config.data_dir()}")
-    print("Keep this window open while you use the app. Close it to stop.")
+    if sys.platform == "win32":
+        os.system(f"title {config.APP_NAME}")
+    print("=" * 60)
+    print(f"  {config.APP_NAME} v{__version__} is running{' (DEMO DATA)' if demo else ''}")
+    print(f"  Open in your browser: {url}")
+    print(f"  Data folder: {config.data_dir()}")
+    print()
+    print("  Keep this window open while you use the app")
+    print("  (you can minimise it). Close it to stop the app.")
+    print("=" * 60)
     if "--no-browser" not in sys.argv:
         threading.Thread(target=lambda: (time.sleep(1.2), webbrowser.open(url)), daemon=True).start()
 

@@ -5,7 +5,7 @@ from community_manager.services import people
 
 def test_pages_load(client):
     for url in ("/", "/members/", "/families/", "/yuvak-mandal/", "/yuvak-mandal/?tab=alumni",
-                "/yuvak-mandal/?tab=upcoming", "/backup", "/members/new", "/families/new"):
+                "/yuvak-mandal/?tab=upcoming", "/backup", "/members/new", "/families/new", "/help"):
         assert client.get(url).status_code == 200, url
 
 
@@ -68,3 +68,18 @@ def test_backup_download_and_restore(client, db):
     r = client.post("/backup/restore", data={"file": (io.BytesIO(b"junk"), "b.db")},
                     content_type="multipart/form-data", follow_redirects=True)
     assert "not a Community Manager backup" in r.get_data(as_text=True)
+
+
+def test_missing_page_shows_friendly_404(client):
+    r = client.get("/members/999")
+    assert r.status_code == 404 and "Page not found" in r.get_data(as_text=True)
+
+
+def test_demo_data_loads_and_renders(app, client, db):
+    from community_manager import demo
+    demo.load(db)
+    demo.load(db)  # second call is a no-op
+    assert db.execute("SELECT COUNT(*) FROM members").fetchone()[0] == 31
+    for url in ("/", "/families/1/tree", "/yuvak-mandal/?tab=alumni", "/yuvak-mandal/?tab=upcoming", "/members/"):
+        assert client.get(url).status_code == 200, url
+    assert "Ramesh" in client.get("/yuvak-mandal/?tab=alumni").get_data(as_text=True)
