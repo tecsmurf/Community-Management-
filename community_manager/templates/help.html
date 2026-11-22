@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Help{% endblock %}
+{% block content %}
+<div class="page-head"><h1>How to use {{ cfg.APP_NAME }}</h1></div>
+
+<section class="card help">
+  <h2>1. Add a family</h2>
+  <ol>
+    <li>Click <b>Families</b>, then <b>+ New family</b>.</li>
+    <li>Enter the surname, address, area and phone, then <b>Save</b>. The family gets an ID like <span class="code">{{ cfg.FAMILY_PREFIX }}-0001</span>.</li>
+  </ol>
+
+  <h2>2. Add the people in it</h2>
+  <ol>
+    <li>On the family page, click <b>+ Add member</b>. Each person gets an ID like <span class="code">{{ cfg.MEMBER_PREFIX }}-00001</span>.</li>
+    <li>Add the elders first (for example the grandfather and grandmother), then their children, so you can pick parents from the list.</li>
+    <li>For the head of the family, choose <b>Self (Head)</b> as the relation.</li>
+    <li>In <b>Father</b>, <b>Mother</b> and <b>Husband / Wife</b>, start typing a name or ID and pick from the list. You only need to set the husband/wife on one of the two; the other is linked automatically.</li>
+    <li>Use <b>Save and add another to this family</b> to enter a whole family quickly.</li>
+    <li>Leave the address blank if the person lives at the family's address.</li>
+  </ol>
+
+  <h2>3. Family tree</h2>
+  <p>Open a family or a person and click <b>Family tree</b>. The tree is drawn from the father, mother and husband/wife links, so the more of these you fill in, the more complete it is. A married daughter who moved to another family still appears in her parents' tree. Click <b>Print</b> to print it.</p>
+
+  <h2>4. {{ cfg.YUVAK_MANDAL_NAME }}</h2>
+  <ul>
+    <li>Every male member aged {{ cfg.YUVAK_MIN_AGE }} to {{ cfg.YUVAK_MAX_AGE }} gets a Yuvak Mandal ID (like <span class="code">{{ cfg.YUVAK_PREFIX }}-0001</span>) automatically. A date of birth is needed.</li>
+    <li>A boy gets his ID automatically when he turns {{ cfg.YUVAK_MIN_AGE }}.</li>
+    <li>After {{ cfg.YUVAK_MAX_AGE }}, a member keeps his ID and moves to the <b>Alumni</b> list automatically.</li>
+    <li>For older men who were members in the past, open <b>Edit</b> and tick <b>Was a Yuvak Mandal member in the past</b>.</li>
+    <li>The <b>Coming up this year</b> tab shows who will join or become alumni in the next 12 months.</li>
+  </ul>
+
+  <h2>5. Searching and lists</h2>
+  <ul>
+    <li>The search box at the top finds people by name, member ID, Yuvak ID or phone. Typing a family ID opens that family.</li>
+    <li>On <b>Members</b>, filter by area, gender, profession or Yuvak status, then click <b>Export to Excel (CSV)</b> to get that list as a spreadsheet.</li>
+    <li>Any page can be printed with the <b>Print</b> button or <kbd>Ctrl</kbd>+<kbd>P</kbd>.</li>
+  </ul>
+
+  <h2>6. Keeping the data safe</h2>
+  <ul>
+    <li>All data stays on this computer. A backup copy is made automatically every time the app starts.</li>
+    <li>Once a week, open <b>Backup</b> and click <b>Download backup</b>, then keep that file on a pen drive or in Google Drive.</li>
+    <li>To move to a new computer, install the app there and use <b>Backup → Restore</b> with the downloaded file.</li>
+  </ul>
+
+  <h2>7. Opening and closing the app</h2>
+  <p>Open <b>{{ cfg.APP_NAME }}</b> from the desktop icon. A small black window opens and the app appears in the web browser. Keep the black window open while working (you can minimise it). Close it when you are done. If you close the browser tab by mistake, double-click the desktop icon again.</p>
+  <p>To show the app to someone without using real records, open <b>{{ cfg.APP_NAME }} (demo with sample data)</b> from the Start menu. It uses a separate set of made-up families, so nothing you do there touches the real data.</p>
+</section>
+{% endblock %}

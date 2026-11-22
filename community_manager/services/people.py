@@ -17,7 +17,7 @@ FAMILY_FIELDS = (
 
 RELATIONS = [
     "Self (Head)", "Wife", "Husband", "Son", "Daughter", "Father", "Mother",
-    "Brother", "Sister", "Daughter-in-law", "Son-in-law", "Grandson",
+    "Brother", "Sister", "Daughter-in-law", "Son-in-law", "Brother-in-law", "Sister-in-law", "Grandson",
     "Granddaughter", "Grandfather", "Grandmother", "Nephew", "Niece", "Other",
 ]
 MARITAL_STATUSES = ["Unmarried", "Married", "Widowed", "Divorced"]
@@ -465,3 +465,31 @@ def stats(db, today=None):
         "yuvak_alumni": search_members(db, MemberFilter(yuvak="alumni"), limit=1, today=today)[1],
         "areas": len(all_areas(db)),
     }
+
+
+def upcoming_birthdays(db, days=30, today=None):
+    """Living members whose birthday falls within the next `days` days."""
+    today = today or date.today()
+    rows = db.execute(f"{MEMBER_SELECT} WHERE m.is_deceased = 0 AND m.dob IS NOT NULL AND m.dob <> ''").fetchall()
+    out = []
+    for row in rows:
+        dob = parse_date(row["dob"])
+        if dob is None:
+            continue
+        next_bday = add_years(dob, today.year - dob.year)
+        if next_bday < today:
+            next_bday = add_years(dob, today.year + 1 - dob.year)
+        in_days = (next_bday - today).days
+        if in_days <= days:
+            m = decorate(row, today)
+            m.update(birthday=next_bday, in_days=in_days, turning=next_bday.year - dob.year)
+            out.append(m)
+    return sorted(out, key=lambda m: (m["in_days"], m["name"]))
+
+
+def area_counts(db):
+    rows = db.execute(
+        "SELECT COALESCE(NULLIF(m.area, ''), NULLIF(f.area, ''), 'Not set') AS area, COUNT(*) AS n"
+        " FROM members m LEFT JOIN families f ON f.id = m.family_id WHERE m.is_deceased = 0"
+        " GROUP BY 1 ORDER BY n DESC, area").fetchall()
+    return [dict(r) for r in rows]

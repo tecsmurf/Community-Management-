@@ -4,12 +4,13 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}{{ cfg.APP_NAME }}{% endblock %} · {{ cfg.APP_NAME }}</title>
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
   <header class="topbar no-print">
     <a class="brand" href="{{ url_for('main.dashboard') }}">
-      <span class="brand-mark">A</span>
+      <img class="brand-mark" src="{{ url_for('static', filename='icon.png') }}" alt="">
       <span><strong>{{ cfg.COMMUNITY_NAME }}</strong><small>{{ cfg.APP_NAME }}</small></span>
     </a>
     <nav>
@@ -19,12 +20,14 @@
       <a href="{{ url_for('families.index') }}" class="{{ 'on' if ep.startswith('families.') }}">Families</a>
       <a href="{{ url_for('yuvak.index') }}" class="{{ 'on' if ep.startswith('yuvak.') }}">Yuvak Mandal</a>
       <a href="{{ url_for('main.backup_page') }}" class="{{ 'on' if ep.startswith('main.backup') }}">Backup</a>
+      <a href="{{ url_for('main.help_page') }}" class="{{ 'on' if ep == 'main.help_page' }}">Help</a>
     </nav>
     <form class="quick-search" action="{{ url_for('main.search') }}">
       <input type="search" name="q" placeholder="Search name, ID, phone…" aria-label="Search">
     </form>
   </header>
 
+  {% if demo_mode %}<div class="demo-banner no-print">Demo mode: this is sample data for trying out the app. Real records are kept separately.</div>{% endif %}
   <main>
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% for category, message in messages %}

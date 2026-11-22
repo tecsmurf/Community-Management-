@@ -35,10 +35,7 @@ h2 { font-size: 1.1rem; margin: 0 0 .75rem; }
 .brand { display: flex; align-items: center; gap: .6rem; color: var(--ink); }
 .brand:hover { text-decoration: none; }
 .brand small { display: block; color: var(--muted); font-size: .75rem; }
-.brand-mark {
-  display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%;
-  background: var(--accent); color: #fff; font-weight: 700;
-}
+.brand-mark { width: 38px; height: 38px; border-radius: 9px; }
 .topbar nav { display: flex; gap: .25rem; flex-wrap: wrap; }
 .topbar nav a { padding: .4rem .75rem; border-radius: 6px; color: var(--ink); }
 .topbar nav a.on, .topbar nav a:hover { background: var(--accent-soft); color: var(--accent); text-decoration: none; }
@@ -72,8 +69,8 @@ input:focus, select:focus, textarea:focus { outline: 2px solid var(--accent-soft
 input[type=checkbox] { width: auto; }
 
 .filters { display: flex; gap: .5rem; flex-wrap: wrap; align-items: center; }
-.filters input, .filters select { width: auto; flex: 1 1 160px; }
-.filters input[type=search] { flex: 2 1 260px; }
+.filters input, .filters select { width: auto; flex: 1 1 150px; max-width: 220px; }
+.filters input[type=search] { flex: 3 1 260px; max-width: none; }
 
 .form fieldset { border: none; border-top: 1px solid var(--line); padding: 1rem 0 0; margin: 0 0 1rem; }
 .form legend { font-weight: 600; padding-right: .5rem; }
@@ -165,3 +162,21 @@ dl.inline { grid-template-columns: 130px 1fr; }
   a { color: inherit; }
   .tree-wrap { overflow: visible; }
 }
+
+/* Dashboard lists */
+ul.list { list-style: none; margin: 0; padding: 0; }
+ul.list li { display: flex; align-items: center; gap: .75rem; padding: .45rem 0; border-bottom: 1px solid var(--line); }
+ul.list li:last-child { border-bottom: none; }
+.when { min-width: 72px; font-size: .8rem; font-weight: 600; color: var(--accent); }
+.when.today { background: var(--accent); color: #fff; border-radius: 999px; padding: .05rem .55rem; text-align: center; }
+.bars .label { min-width: 120px; }
+.bar { flex: 1; height: 10px; background: var(--bg); border-radius: 999px; overflow: hidden; }
+.bar span { display: block; height: 100%; background: var(--accent); border-radius: 999px; opacity: .8; }
+
+/* Help page */
+.help h2 { margin-top: 1.25rem; }
+.help h2:first-child { margin-top: 0; }
+.help li { margin-bottom: .35rem; }
+.help kbd { background: var(--bg); border: 1px solid var(--line); border-radius: 4px; padding: 0 .3rem; font-size: .85em; }
+
+.demo-banner { background: #fff4d6; color: #7a5a00; text-align: center; padding: .45rem 1rem; font-size: .85rem; border-bottom: 1px solid #f0dfa8; }
