@@ -36,18 +36,29 @@
   <ul>
     <li>The search box at the top finds people by name, member ID, Yuvak ID or phone. Typing a family ID opens that family.</li>
     <li>On <b>Members</b>, filter by area, gender, profession or Yuvak status, then click <b>Export to Excel (CSV)</b> to get that list as a spreadsheet.</li>
-    <li>Any page can be printed with the <b>Print</b> button or <kbd>Ctrl</kbd>+<kbd>P</kbd>.</li>
+    {% if not native_app %}<li>Any page can be printed with the <b>Print</b> button or <kbd>Ctrl</kbd>+<kbd>P</kbd>.</li>{% endif %}
   </ul>
 
   <h2>6. Keeping the data safe</h2>
   <ul>
-    <li>All data stays on this computer. A backup copy is made automatically every time the app starts.</li>
+    <li>All data stays on this {{ 'phone' if native_app else 'computer' }}. A backup copy is made automatically every time the app starts.</li>
+    {% if native_app %}
+    <li>Once a week, open <b>Backup</b>, tap <b>Save backup</b> and save the file to Google Drive.</li>
+    <li>To move to a new phone, install the app there and use <b>Backup → Choose backup file and restore</b>.</li>
+    {% else %}
     <li>Once a week, open <b>Backup</b> and click <b>Download backup</b>, then keep that file on a pen drive or in Google Drive.</li>
     <li>To move to a new computer, install the app there and use <b>Backup → Restore</b> with the downloaded file.</li>
+    {% endif %}
   </ul>
 
   <h2>7. Opening and closing the app</h2>
+  {% if native_app %}
+  <p>Open <b>{{ cfg.APP_NAME }}</b> from the phone's app list. Everything is saved on the phone as you go and works without internet. Use the phone's Back button to go to the previous page.</p>
+  <p>To move data between the phone and the computer version, save a backup on one (Backup → Save backup, for example to Google Drive) and restore that file on the other. Restoring replaces the data on that device.</p>
+  {% else %}
   <p>Open <b>{{ cfg.APP_NAME }}</b> from the desktop icon. A small black window opens and the app appears in the web browser. Keep the black window open while working (you can minimise it). Close it when you are done. If you close the browser tab by mistake, double-click the desktop icon again.</p>
   <p>To show the app to someone without using real records, open <b>{{ cfg.APP_NAME }} (demo with sample data)</b> from the Start menu. It uses a separate set of made-up families, so nothing you do there touches the real data.</p>
+  <p>There is also an Android app. A backup made here can be restored on the phone, and a phone backup can be restored here.</p>
+  {% endif %}
 </section>
 {% endblock %}

@@ -7,7 +7,7 @@
   <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
-<body>
+<body class="{{ 'native' if native_app }}">
   <header class="topbar no-print">
     <a class="brand" href="{{ url_for('main.dashboard') }}">
       <img class="brand-mark" src="{{ url_for('static', filename='icon.png') }}" alt="">
@@ -37,6 +37,35 @@
     {% block content %}{% endblock %}
   </main>
 
-  <footer class="no-print">{{ cfg.APP_NAME }} v{{ app_version }} · Data is stored only on this computer.</footer>
+  <footer class="no-print">{{ cfg.APP_NAME }} v{{ app_version }} · Data is stored only on this {{ 'phone' if native_app else 'computer' }}.</footer>
+
+  <dialog id="confirm-dialog" class="confirm-dialog">
+    <p id="confirm-text"></p>
+    <div class="form-actions">
+      <button type="button" class="btn" id="confirm-cancel">Cancel</button>
+      <button type="button" class="btn danger" id="confirm-ok">Delete</button>
+    </div>
+  </dialog>
+  <script>
+    // In-page confirmation for forms marked data-confirm.
+    (function () {
+      var dialog = document.getElementById("confirm-dialog"), pending = null;
+      document.querySelectorAll("form[data-confirm]").forEach(function (form) {
+        form.addEventListener("submit", function (e) {
+          if (form.dataset.confirmed) return;
+          e.preventDefault();
+          pending = form;
+          document.getElementById("confirm-text").textContent = form.dataset.confirm;
+          document.getElementById("confirm-ok").textContent = form.dataset.confirmAction || "OK";
+          dialog.showModal();
+        });
+      });
+      document.getElementById("confirm-cancel").onclick = function () { dialog.close(); pending = null; };
+      document.getElementById("confirm-ok").onclick = function () {
+        dialog.close();
+        if (pending) { pending.dataset.confirmed = "1"; pending.submit(); }
+      };
+    })();
+  </script>
 </body>
 </html>

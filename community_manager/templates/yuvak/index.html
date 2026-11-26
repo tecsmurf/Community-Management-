@@ -5,7 +5,7 @@
   <h1>{{ cfg.YUVAK_MANDAL_NAME }}</h1>
   <div class="actions no-print">
     {% if tab != 'upcoming' %}<a class="btn" href="{{ url_for('main.export_members', yuvak=tab) }}">Export to Excel (CSV)</a>{% endif %}
-    <a class="btn" href="javascript:window.print()">Print</a>
+    <a class="btn print-btn" href="javascript:window.print()">Print</a>
   </div>
 </div>
 <p class="hint">Every male member aged {{ cfg.YUVAK_MIN_AGE }} to {{ cfg.YUVAK_MAX_AGE }} gets a Yuvak Mandal ID automatically. After {{ cfg.YUVAK_MAX_AGE }} they keep their ID and are listed as alumni.</p>
@@ -25,7 +25,7 @@
   </form>
   {% endif %}
   {% if rows %}
-  <table>
+  <div class="table-scroll"><table>
     <thead><tr>
       <th>Yuvak ID</th><th>Name</th><th>Age</th><th>Member ID</th><th>Family</th><th>Phone</th>
       {% if tab == 'alumni' %}<th>Alumni since</th>{% elif tab == 'upcoming' %}<th>What happens</th><th>On</th>{% else %}<th>Registered</th>{% endif %}
@@ -45,7 +45,7 @@
       </tr>
     {% endfor %}
     </tbody>
-  </table>
+  </table></div>
   {% else %}
   <p class="empty">Nobody here yet.</p>
   {% endif %}
