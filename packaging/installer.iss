@@ -3,7 +3,7 @@
 
 #define AppName "Community Manager"
 #ifndef AppVersion
-  #define AppVersion "1.0.0"
+  #define AppVersion "1.1.0"
 #endif
 
 [Setup]
@@ -19,6 +19,8 @@ OutputBaseFilename=CommunityManager-Setup
 Compression=lzma2
 SolidCompression=yes
 WizardStyle=modern
+SetupIconFile=app.ico
+UninstallDisplayIcon={app}\CommunityManager.exe
 UninstallDisplayName={#AppName}
 
 [Tasks]
@@ -29,6 +31,7 @@ Source: "..\dist\CommunityManager\*"; DestDir: "{app}"; Flags: recursesubdirs ig
 
 [Icons]
 Name: "{group}\{#AppName}"; Filename: "{app}\CommunityManager.exe"
+Name: "{group}\{#AppName} (demo with sample data)"; Filename: "{app}\CommunityManager.exe"; Parameters: "--demo"
 Name: "{group}\Uninstall {#AppName}"; Filename: "{uninstallexe}"
 Name: "{autodesktop}\{#AppName}"; Filename: "{app}\CommunityManager.exe"; Tasks: desktopicon
 

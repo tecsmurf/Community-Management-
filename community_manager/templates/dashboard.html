@@ -19,10 +19,45 @@
   <a class="stat" href="{{ url_for('yuvak.index', tab='alumni') }}"><b>{{ stats.yuvak_alumni }}</b><span>Yuvak alumni</span></a>
 </section>
 
+{% if recent %}
+<div class="cols">
+  <section class="card">
+    <h2>Birthdays in the next 30 days</h2>
+    {% if birthdays %}
+    <ul class="list">
+      {% for b in birthdays %}
+      <li>
+        <span class="when {{ 'today' if b.in_days == 0 }}">{{ 'Today' if b.in_days == 0 else 'Tomorrow' if b.in_days == 1 else b.birthday.strftime('%d %b') }}</span>
+        <a href="{{ url_for('members.view', member_id=b.id) }}">{{ b.name }}</a>
+        <span class="muted">turns {{ b.turning }}{% if b.phone %} · {{ b.phone }}{% endif %}</span>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p class="muted">No birthdays coming up.</p>
+    {% endif %}
+  </section>
+
+  <section class="card">
+    <h2>Members by area</h2>
+    {% set top = areas[0].n if areas else 1 %}
+    <ul class="list bars">
+      {% for a in areas %}
+      <li>
+        <a class="label" href="{{ url_for('members.index', area=a.area, deceased='0') if a.area != 'Not set' else url_for('members.index') }}">{{ a.area }}</a>
+        <span class="bar"><span style="width: {{ (a.n / top * 100)|round(1) }}%"></span></span>
+        <b>{{ a.n }}</b>
+      </li>
+      {% endfor %}
+    </ul>
+  </section>
+</div>
+{% endif %}
+
 <section class="card">
   <h2>Recently added</h2>
   {% if recent %}
-  <table>
+  <div class="table-scroll"><table>
     <thead><tr><th>ID</th><th>Name</th><th>Family</th><th>Age</th><th></th></tr></thead>
     <tbody>
     {% for m in recent %}
@@ -35,7 +70,7 @@
       </tr>
     {% endfor %}
     </tbody>
-  </table>
+  </table></div>
   {% else %}
   <div class="empty">
     <p>No members yet. Start by creating a family, then add each person in it.</p>

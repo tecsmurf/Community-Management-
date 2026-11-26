@@ -6,7 +6,7 @@
   <h1>{{ m.name }} <span class="code">{{ m.code }}</span> {{ yuvak_badge(m) }}</h1>
   <div class="actions no-print">
     <a class="btn" href="{{ url_for('members.family_tree', member_id=m.id) }}">Family tree</a>
-    <a class="btn" href="javascript:window.print()">Print</a>
+    <a class="btn print-btn" href="javascript:window.print()">Print</a>
     <a class="btn primary" href="{{ url_for('members.edit', member_id=m.id) }}">Edit</a>
   </div>
 </div>
@@ -70,7 +70,7 @@
     </section>
 
     <form method="post" action="{{ url_for('members.delete', member_id=m.id) }}" class="no-print"
-          onsubmit="return confirm('Delete this member permanently? Links to their parents, spouse and children will be removed.');">
+          data-confirm="Delete this member permanently? Links to their parents, spouse and children will be removed." data-confirm-action="Delete">
       <button class="btn danger">Delete member</button>
     </form>
   </div>

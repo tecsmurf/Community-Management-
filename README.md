@@ -23,6 +23,30 @@ internet, and keeps all data in a single SQLite database file on that PC.
 - Search and filters (name, any ID, phone, area, gender, profession, Yuvak status).
 - Export to Excel (CSV), print any page.
 - Backup: an automatic copy at every start (last 15 kept), one-click backup download and restore.
+- Home page with counts, birthdays in the next 30 days and members by area.
+- Built-in Help page, and a **demo mode** (Start menu: "Community Manager (demo with sample
+  data)", or `python run.py --demo`) that opens the app on made-up families kept apart from real data.
+
+## The shared online version (PC and phone together)
+
+The same app can run online so every phone and computer sees the same
+records, with changes showing on other open screens within a few seconds.
+It needs internet and a sign-in. It is set up as a Vercel project from this
+repository (`app.py` is the entry point) with a Neon PostgreSQL database, and
+these settings:
+
+| Setting | What it is |
+| --- | --- |
+| `DATABASE_URL` | Added by the Neon integration. |
+| `COMMUNITY_SECRET_KEY` | Any long random text. Keeps sign-ins safe. |
+| `COMMUNITY_SETUP_CODE` | A code you choose, used once on the Setup page to create the first admin. |
+
+To move the records from the offline PC version: download a backup on the PC
+(Backup page), sign in online as an admin and restore that file. On a phone,
+open the web address in Chrome and choose Install app to get an icon.
+
+Run the tests against PostgreSQL with
+`TEST_DATABASE_URL=postgresql://user@host/emptydb python -m pytest`.
 
 ## Installing on Windows (for the person using it)
 
@@ -55,6 +79,7 @@ The installer is written to `dist\CommunityManager-Setup.exe`.
 ```bash
 pip install -r requirements.txt -r requirements-dev.txt
 python run.py            # opens http://127.0.0.1:5055 in the browser
+python run.py --demo     # same, with sample data in a separate demo folder
 python -m pytest         # run the tests
 ```
 
@@ -72,7 +97,8 @@ without touching real data).
 | `community_manager/services/tree.py` | Family tree building |
 | `community_manager/routes/` | One file per section of the app (Flask blueprints) |
 | `community_manager/templates/` | HTML pages |
-| `packaging/` | PyInstaller and Inno Setup files for the Windows installer |
+| `community_manager/demo.py` | Sample data used by demo mode |
+| `packaging/` | PyInstaller and Inno Setup files for the Windows installer (`make_icon.py` redraws the icon) |
 
 ### Adding a feature later
 

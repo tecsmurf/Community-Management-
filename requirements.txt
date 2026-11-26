@@ -1,2 +1,4 @@
 Flask>=3.0
 waitress>=3.0
+# Only the online version uses this, to reach its PostgreSQL database.
+psycopg[binary]>=3.2

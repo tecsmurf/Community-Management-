@@ -5,7 +5,7 @@ from community_manager.services import people
 
 def test_pages_load(client):
     for url in ("/", "/members/", "/families/", "/yuvak-mandal/", "/yuvak-mandal/?tab=alumni",
-                "/yuvak-mandal/?tab=upcoming", "/backup", "/members/new", "/families/new"):
+                "/yuvak-mandal/?tab=upcoming", "/backup", "/members/new", "/families/new", "/help"):
         assert client.get(url).status_code == 200, url
 
 
@@ -68,3 +68,65 @@ def test_backup_download_and_restore(client, db):
     r = client.post("/backup/restore", data={"file": (io.BytesIO(b"junk"), "b.db")},
                     content_type="multipart/form-data", follow_redirects=True)
     assert "not a Community Manager backup" in r.get_data(as_text=True)
+
+
+def test_missing_page_shows_friendly_404(client):
+    r = client.get("/members/999")
+    assert r.status_code == 404 and "Page not found" in r.get_data(as_text=True)
+
+
+def test_demo_data_loads_and_renders(app, client, db):
+    from community_manager import demo
+    demo.load(db)
+    demo.load(db)  # second call is a no-op
+    assert db.execute("SELECT COUNT(*) FROM members").fetchone()[0] == 31
+    for url in ("/", "/families/1/tree", "/yuvak-mandal/?tab=alumni", "/yuvak-mandal/?tab=upcoming", "/members/"):
+        assert client.get(url).status_code == 200, url
+    assert "Ramesh" in client.get("/yuvak-mandal/?tab=alumni").get_data(as_text=True)
+
+
+class FakePhone:
+    """Stands in for the Android app's save and open screens."""
+
+    def __init__(self, pick=None, save=True):
+        self.saved, self.pick, self.save = [], pick, save
+
+    def save_file(self, path, filename, mime):
+        self.saved.append((filename, mime, path.read_bytes()))
+        return self.save
+
+    def pick_file(self, target):
+        if self.pick is None:
+            return False
+        target.write_bytes(self.pick)
+        return True
+
+
+def test_phone_app_saves_and_restores_through_native_screens(app, client):
+    client.post("/families/new", data={"family_name": "Before"})
+    phone = FakePhone()
+    app.config["NATIVE"] = phone
+
+    html = client.get("/backup").get_data(as_text=True)
+    assert "Choose backup file and restore" in html and 'type="file"' not in html
+    assert 'class="native"' in client.get("/families/1").get_data(as_text=True)
+
+    r = client.get("/backup/download", headers={"Referer": "http://localhost/backup"})
+    assert r.status_code == 302 and r.headers["Location"].endswith("/backup")
+    name, mime, data = phone.saved[-1]
+    assert name.endswith(".db") and data.startswith(b"SQLite format 3")
+
+    r = client.get("/export/members.csv", follow_redirects=True)
+    assert "0 members exported and saved" in r.get_data(as_text=True)
+    assert phone.saved[-1][0].endswith(".csv")
+
+    client.post("/families/new", data={"family_name": "After"})
+    phone.pick = data
+    r = client.post("/backup/restore", follow_redirects=True)
+    assert "Backup restored" in r.get_data(as_text=True)
+    html = client.get("/families/").get_data(as_text=True)
+    assert "Before" in html and "After" not in html
+
+    phone.pick, phone.save = None, False
+    assert "No file was chosen" in client.post("/backup/restore", follow_redirects=True).get_data(as_text=True)
+    assert "Nothing was saved" in client.get("/backup/download", follow_redirects=True).get_data(as_text=True)

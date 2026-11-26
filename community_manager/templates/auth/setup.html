@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}First-time setup{% endblock %}
+{% block content %}
+<form method="post" class="card form narrow">
+  <h1>First-time setup</h1>
+  {% if has_code %}
+  <p>Create the first account. It will be an admin account, which can add accounts for the rest of the team.</p>
+  <label>Setup code<input name="setup_code" type="password" required autofocus></label>
+  <label>Your name<input name="full_name" autocomplete="name"></label>
+  <label>Username<input name="username" autocomplete="username" autocapitalize="none" required></label>
+  <label>Password (at least 8 characters)<input name="password" type="password" autocomplete="new-password" minlength="8" required></label>
+  <label>Password again<input name="password2" type="password" autocomplete="new-password" minlength="8" required></label>
+  <div class="form-actions"><button class="btn primary">Create admin account</button></div>
+  {% else %}
+  <p class="warn">No setup code has been chosen for this server yet, so the first account cannot be created. The person who put the app online needs to set COMMUNITY_SETUP_CODE.</p>
+  {% endif %}
+</form>
+{% endblock %}

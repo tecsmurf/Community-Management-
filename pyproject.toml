@@ -1,0 +1,44 @@
+# Briefcase settings for the Android app (see mobile/README.md).
+# The Windows version is built with PyInstaller (packaging/) and does not use this file.
+
+[tool.briefcase]
+project_name = "Community Manager"
+bundle = "org.ambesh"
+version = "1.2.0"
+url = "https://github.com/tecsmurf/Community-Management-"
+license.file = "mobile/LICENSE"
+author = "Ambesh Guru Shwetambar Jain Samaj"
+author_email = "noreply@example.com"
+
+[tool.briefcase.app.community_app]
+formal_name = "Community Manager"
+description = "Members, families, Yuvak Mandal and family trees for the community."
+long_description = "Keeps member, family and Yuvak Mandal records with family trees, on the phone and offline."
+icon = "mobile/icons/community_app"
+sources = [
+    "mobile/community_app",
+    "community_manager",
+]
+requires = [
+    "flask>=3.0",
+    "waitress>=3.0",
+]
+
+[tool.briefcase.app.community_app.android]
+requires = [
+    "toga-android~=0.5.7",
+]
+base_theme = "Theme.MaterialComponents.Light.DarkActionBar"
+primary_color = "#B5541C"
+primary_color_dark = "#8A3F14"
+accent_color = "#B5541C"
+splash_background_color = "#B5541C"
+build_gradle_dependencies = [
+    "com.google.android.material:material:1.13.0",
+    "androidx.webkit:webkit:1.15.0",
+]
+build_gradle_extra_content = """
+chaquopy.defaultConfig.staticProxy("toga_android.widgets.internal.webview")
+"""
+# Lets the Back button go to the previous page on Android 13 and later.
+android_manifest_application_attrs_extra_content = 'android:enableOnBackInvokedCallback="true"'

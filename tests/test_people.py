@@ -9,7 +9,8 @@ TODAY = date(2026, 10, 10)
 
 def add(db, first, gender="M", dob=None, **kw):
     data = {f: None for f in people.MEMBER_FIELDS}
-    data.update(first_name=first, gender=gender, dob=dob, is_deceased=0, **kw)
+    data.update(first_name=first, gender=gender, dob=dob, is_deceased=0)
+    data.update(kw)
     return people.save_member(db, data)
 
 
@@ -140,3 +141,17 @@ def test_delete_family_requires_empty(db):
     people.delete_member(db, mid)
     people.delete_family(db, fam)
     assert people.get_family(db, fam) is None
+
+
+def test_upcoming_birthdays_and_areas(db):
+    fam = people.save_family(db, {"family_name": "Shah", "area": "Paldi"})
+    add(db, "Today", dob="2000-10-10", family_id=fam)
+    add(db, "NextMonth", dob="1990-11-05", family_id=fam)
+    add(db, "Later", dob="1990-12-25", family_id=fam)
+    add(db, "Late", dob="1990-10-12", is_deceased=1, area="Navrangpura")
+    got = people.upcoming_birthdays(db, days=30, today=TODAY)
+    assert [(m["first_name"], m["in_days"], m["turning"]) for m in got] == [("Today", 0, 26), ("NextMonth", 26, 36)]
+    # Year wrap: a January birthday seen from late December.
+    add(db, "NewYear", dob="1980-01-02")
+    assert [m["first_name"] for m in people.upcoming_birthdays(db, 30, date(2026, 12, 20))] == ["Later", "NewYear"]
+    assert people.area_counts(db)[0] == {"area": "Paldi", "n": 3}
