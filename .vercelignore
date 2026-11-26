@@ -3,3 +3,5 @@ packaging/
 tests/
 *.db
 logs/
+# The Android build settings; the online version takes its packages from requirements.txt.
+pyproject.toml
