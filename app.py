@@ -14,6 +14,18 @@ time.tzset()
 # The server's disk is temporary; only the database keeps the records.
 os.environ.setdefault("COMMUNITY_DATA_DIR", "/tmp/community-manager")
 
-from community_manager import create_app  # noqa: E402
+if os.environ.get("COMMUNITY_DATABASE_URL") or os.environ.get("DATABASE_URL"):
+    from community_manager import create_app
 
-app = create_app()
+    app = create_app()
+else:
+    # Without a database anything typed in would be lost, so open nothing yet.
+    from flask import Flask
+
+    app = Flask(__name__)
+
+    @app.route("/", defaults={"_path": ""})
+    @app.route("/<path:_path>")
+    def not_ready(_path):
+        return ("<h1>Community Manager is being set up</h1>"
+                "<p>The database is not connected yet. Please try again later.</p>"), 503
