@@ -62,7 +62,7 @@
       <label>Mother<input name="mother_id" list="members-female" value="{{ m.mother_id_label or '' }}"></label>
       <label>Husband / Wife<input name="spouse_id" list="members-all" value="{{ m.spouse_id_label or '' }}"></label>
     </div>
-    <p class="hint"><a href="{{ url_for('families.new') }}" target="_blank">Create a new family</a> if theirs is not in the list yet.</p>
+    <p class="hint"><a href="{{ url_for('families.new') }}">Create a new family</a> if theirs is not in the list yet.</p>
   </fieldset>
 
   <fieldset>

@@ -19,7 +19,7 @@
 
 <section class="card">
   {% if families %}
-  <table>
+  <div class="table-scroll"><table>
     <thead><tr><th>Family ID</th><th>Family</th><th>Head</th><th>Area</th><th>Phone</th><th>Members</th></tr></thead>
     <tbody>
     {% for f in families %}
@@ -33,7 +33,7 @@
       </tr>
     {% endfor %}
     </tbody>
-  </table>
+  </table></div>
   {{ pager(page, pages) }}
   {% else %}
   <p class="empty">No families yet. <a href="{{ url_for('families.new') }}">Create one</a>.</p>

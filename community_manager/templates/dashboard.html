@@ -57,7 +57,7 @@
 <section class="card">
   <h2>Recently added</h2>
   {% if recent %}
-  <table>
+  <div class="table-scroll"><table>
     <thead><tr><th>ID</th><th>Name</th><th>Family</th><th>Age</th><th></th></tr></thead>
     <tbody>
     {% for m in recent %}
@@ -70,7 +70,7 @@
       </tr>
     {% endfor %}
     </tbody>
-  </table>
+  </table></div>
   {% else %}
   <div class="empty">
     <p>No members yet. Start by creating a family, then add each person in it.</p>

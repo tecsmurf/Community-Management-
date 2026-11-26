@@ -64,8 +64,25 @@ def export_members():
         writer.writerow(["Yes" if k == "is_deceased" and m[k] else ("" if k == "is_deceased" else m.get(k) or "")
                          for _, k in EXPORT_COLUMNS])
     # BOM so Excel opens it with the right encoding.
-    return Response("﻿" + buf.getvalue(), mimetype="text/csv",
-                    headers={"Content-Disposition": f"attachment; filename=members-{datetime.now():%Y%m%d}.csv"})
+    content = "﻿" + buf.getvalue()
+    filename = f"members-{datetime.now():%Y%m%d}.csv"
+    native = current_app.config.get("NATIVE")
+    if native:
+        tmp = Path(tempfile.mkdtemp()) / filename
+        tmp.write_text(content, encoding="utf-8")
+        return _saved_on_phone(native.save_file(tmp, filename, "text/csv"), f"{len(rows)} members exported")
+    return Response(content, mimetype="text/csv",
+                    headers={"Content-Disposition": f"attachment; filename={filename}"})
+
+
+def _saved_on_phone(saved, what):
+    """After the phone's save screen: say what happened and go back."""
+    if saved:
+        flash(f"{what} and saved.", "success")
+    else:
+        flash("Nothing was saved.", "error")
+    back = request.referrer or url_for("main.dashboard")
+    return redirect(back if back.startswith(request.host_url) else url_for("main.dashboard"))
 
 
 @bp.route("/backup", methods=["GET"])
@@ -78,17 +95,27 @@ def backup_page():
 def backup_download():
     tmp = Path(tempfile.mkdtemp()) / f"community-backup-{datetime.now():%Y%m%d-%H%M}.db"
     db.write_backup(current_app.config["DATABASE"], tmp)
+    native = current_app.config.get("NATIVE")
+    if native:
+        return _saved_on_phone(native.save_file(tmp, tmp.name, "application/octet-stream"), "Backup created")
     return send_file(tmp, as_attachment=True, download_name=tmp.name)
 
 
 @bp.route("/backup/restore", methods=["POST"])
 def backup_restore():
-    upload = request.files.get("file")
-    if not upload or not upload.filename:
-        flash("Choose a backup file first.", "error")
-        return redirect(url_for("main.backup_page"))
     tmp = Path(tempfile.mkdtemp()) / "upload.db"
-    upload.save(tmp)
+    native = current_app.config.get("NATIVE")
+    if native:
+        # The phone app opens its own file picker and copies the chosen file to tmp.
+        if not native.pick_file(tmp):
+            flash("No file was chosen.", "error")
+            return redirect(url_for("main.backup_page"))
+    else:
+        upload = request.files.get("file")
+        if not upload or not upload.filename:
+            flash("Choose a backup file first.", "error")
+            return redirect(url_for("main.backup_page"))
+        upload.save(tmp)
     if not db.is_valid_database(tmp):
         flash("That file is not a Community Manager backup.", "error")
         return redirect(url_for("main.backup_page"))

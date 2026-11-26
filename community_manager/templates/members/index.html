@@ -42,7 +42,7 @@
 
 <section class="card">
   {% if members %}
-  <table>
+  <div class="table-scroll"><table>
     <thead><tr><th>ID</th><th>Name</th><th>Age</th><th>Family</th><th>Area</th><th>Profession</th><th>Phone</th><th></th></tr></thead>
     <tbody>
     {% for m in members %}
@@ -58,7 +58,7 @@
       </tr>
     {% endfor %}
     </tbody>
-  </table>
+  </table></div>
   {{ pager(page, pages) }}
   {% else %}
   <p class="empty">No members match.</p>

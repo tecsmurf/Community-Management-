@@ -43,7 +43,8 @@ def create_app(test_config=None):
     @app.context_processor
     def globals_for_templates():
         return {"cfg": config, "today": date.today(), "app_version": __version__,
-                "genders": people.GENDERS, "demo_mode": app.config.get("DEMO", False)}
+                "genders": people.GENDERS, "demo_mode": app.config.get("DEMO", False),
+                "native_app": bool(app.config.get("NATIVE"))}
 
     @app.before_request
     def daily_yuvak_sync():

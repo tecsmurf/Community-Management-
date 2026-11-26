@@ -6,7 +6,7 @@
   <h1>{{ f.family_name }} family <span class="code">{{ f.code }}</span></h1>
   <div class="actions no-print">
     <a class="btn" href="{{ url_for('families.family_tree', family_id=f.id) }}">Family tree</a>
-    <a class="btn" href="javascript:window.print()">Print</a>
+    <a class="btn print-btn" href="javascript:window.print()">Print</a>
     <a class="btn" href="{{ url_for('families.edit', family_id=f.id) }}">Edit family</a>
     <a class="btn primary" href="{{ url_for('members.new', family=f.id) }}">+ Add member</a>
   </div>
@@ -27,7 +27,7 @@
 <section class="card">
   <h2>Members ({{ members|length }})</h2>
   {% if members %}
-  <table>
+  <div class="table-scroll"><table>
     <thead><tr><th>ID</th><th>Name</th><th>Relation</th><th>Age</th><th>Profession</th><th>Phone</th><th></th></tr></thead>
     <tbody>
     {% for m in members %}
@@ -42,11 +42,11 @@
       </tr>
     {% endfor %}
     </tbody>
-  </table>
+  </table></div>
   {% else %}
   <p class="empty">No members in this family yet. <a href="{{ url_for('members.new', family=f.id) }}">Add the first one</a>.</p>
   <form method="post" action="{{ url_for('families.delete', family_id=f.id) }}" class="no-print"
-        onsubmit="return confirm('Delete this family?');">
+        data-confirm="Delete this family?" data-confirm-action="Delete">
     <button class="btn danger">Delete family</button>
   </form>
   {% endif %}
