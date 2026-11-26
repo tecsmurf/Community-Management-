@@ -18,6 +18,8 @@ PREFERRED_PORT = 5055
 def free_port(preferred=PREFERRED_PORT):
     for port in (preferred, 0):
         with socket.socket() as s:
+            # Like the server itself, allow a port the last run just let go of.
+            s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             try:
                 s.bind(("127.0.0.1", port))
                 return s.getsockname()[1]
