@@ -16,7 +16,10 @@ launch() {  # launch <path>: restart the app on the sample data, open <path>, wa
     adb forward tcp:5055 tcp:5055 >/dev/null 2>&1 || true
     if curl -sf -o /dev/null http://127.0.0.1:5055/help; then return 0; fi
   done
-  echo "App server did not start"; adb logcat -d | tail -200; return 1
+  echo "App server did not start. App and Python lines from the log:"
+  adb logcat -d > "$OUT/logcat.txt" || true
+  grep -iE "python|chaquopy|AndroidRuntime|beeware|MainActivity|community_app|FATAL|Traceback" "$OUT/logcat.txt" | tail -150
+  return 1
 }
 
 launch /
