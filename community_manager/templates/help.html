@@ -40,6 +40,13 @@
   </ul>
 
   <h2>6. Keeping the data safe</h2>
+  {% if online %}
+  <ul>
+    <li>The records are kept online, so every phone and computer that signs in sees the same data. When someone saves a change, other open screens update by themselves within a few seconds.</li>
+    <li>Once a week, open <b>Backup</b> and click <b>Download backup</b>, then keep that file in Google Drive or on a pen drive.</li>
+    <li>Admins add and remove the people who can sign in on the <b>Users</b> page. Change your own password by clicking your name at the top.</li>
+  </ul>
+  {% else %}
   <ul>
     <li>All data stays on this {{ 'phone' if native_app else 'computer' }}. A backup copy is made automatically every time the app starts.</li>
     {% if native_app %}
@@ -50,9 +57,12 @@
     <li>To move to a new computer, install the app there and use <b>Backup → Restore</b> with the downloaded file.</li>
     {% endif %}
   </ul>
+  {% endif %}
 
   <h2>7. Opening and closing the app</h2>
-  {% if native_app %}
+  {% if online %}
+  <p>Open the app's web address and sign in. To get an app icon: on an Android phone, open the address in Chrome, tap the <b>⋮</b> menu and choose <b>Install app</b> (or <b>Add to Home screen</b>). On a Windows computer, open it in Edge or Chrome and click the install icon at the right end of the address bar. It needs internet.</p>
+  {% elif native_app %}
   <p>Open <b>{{ cfg.APP_NAME }}</b> from the phone's app list. Everything is saved on the phone as you go and works without internet. Use the phone's Back button to go to the previous page.</p>
   <p>To move data between the phone and the computer version, save a backup on one (Backup → Save backup, for example to Google Drive) and restore that file on the other. Restoring replaces the data on that device.</p>
   {% else %}

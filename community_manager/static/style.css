@@ -204,3 +204,17 @@ ul.list li:last-child { border-bottom: none; }
   dl, dl.inline { grid-template-columns: 1fr; gap: .1rem; }
   dl dd { margin-bottom: .5rem; }
 }
+
+/* Sign-in pages, accounts and live updates */
+.form.narrow { max-width: 26rem; margin: 2rem auto; }
+.form.narrow label { margin-bottom: .75rem; }
+.inline-form { display: flex; gap: .4rem; }
+.inline-form input { width: 10rem; }
+.user-menu { display: flex; align-items: center; gap: .5rem; font-size: .85rem; }
+.user-menu form { margin: 0; }
+.link-btn { background: none; border: none; color: inherit; text-decoration: underline; cursor: pointer; font: inherit; padding: 0; }
+.live-banner { position: fixed; left: 50%; bottom: 1rem; transform: translateX(-50%); background: var(--ink); color: #fff;
+  padding: .6rem 1rem; border-radius: var(--radius); box-shadow: 0 4px 16px rgba(0,0,0,.2); z-index: 50; display: flex; gap: .75rem; align-items: center; }
+.live-banner[hidden] { display: none; }
+.live-banner button { background: var(--accent); color: #fff; border: none; border-radius: 4px; padding: .3rem .7rem; cursor: pointer; }
+@media print { .live-banner { display: none; } }

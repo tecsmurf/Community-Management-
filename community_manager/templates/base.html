@@ -6,6 +6,9 @@
   <title>{% block title %}{{ cfg.APP_NAME }}{% endblock %} · {{ cfg.APP_NAME }}</title>
   <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link rel="manifest" href="{{ url_for('main.manifest') }}">
+  <link rel="apple-touch-icon" href="{{ url_for('static', filename='icon.png') }}">
+  <meta name="theme-color" content="#B5541C">
 </head>
 <body class="{{ 'native' if native_app }}">
   <header class="topbar no-print">
@@ -13,6 +16,7 @@
       <img class="brand-mark" src="{{ url_for('static', filename='icon.png') }}" alt="">
       <span><strong>{{ cfg.COMMUNITY_NAME }}</strong><small>{{ cfg.APP_NAME }}</small></span>
     </a>
+    {% if signed_in %}
     <nav>
       {% set ep = request.endpoint or '' %}
       <a href="{{ url_for('main.dashboard') }}" class="{{ 'on' if ep == 'main.dashboard' }}">Home</a>
@@ -21,10 +25,18 @@
       <a href="{{ url_for('yuvak.index') }}" class="{{ 'on' if ep.startswith('yuvak.') }}">Yuvak Mandal</a>
       <a href="{{ url_for('main.backup_page') }}" class="{{ 'on' if ep.startswith('main.backup') }}">Backup</a>
       <a href="{{ url_for('main.help_page') }}" class="{{ 'on' if ep == 'main.help_page' }}">Help</a>
+      {% if online and g.user.is_admin %}<a href="{{ url_for('auth.users') }}" class="{{ 'on' if ep == 'auth.users' }}">Users</a>{% endif %}
     </nav>
     <form class="quick-search" action="{{ url_for('main.search') }}">
       <input type="search" name="q" placeholder="Search name, ID, phone…" aria-label="Search">
     </form>
+    {% if online %}
+    <div class="user-menu">
+      <a href="{{ url_for('auth.account') }}" title="Change my password">{{ g.user.full_name or g.user.username }}</a>
+      <form method="post" action="{{ url_for('auth.logout') }}"><button class="link-btn">Sign out</button></form>
+    </div>
+    {% endif %}
+    {% endif %}
   </header>
 
   {% if demo_mode %}<div class="demo-banner no-print">Demo mode: this is sample data for trying out the app. Real records are kept separately.</div>{% endif %}
@@ -37,7 +49,12 @@
     {% block content %}{% endblock %}
   </main>
 
-  <footer class="no-print">{{ cfg.APP_NAME }} v{{ app_version }} · Data is stored only on this {{ 'phone' if native_app else 'computer' }}.</footer>
+  <footer class="no-print">{{ cfg.APP_NAME }} v{{ app_version }} · {% if online %}Data is shared online, so every phone and computer sees the same records.{% else %}Data is stored only on this {{ 'phone' if native_app else 'computer' }}.{% endif %}</footer>
+
+  <div class="live-banner no-print" id="live-banner" hidden>
+    <span>Someone else just changed the records.</span>
+    <button type="button" onclick="location.reload()">Show latest</button>
+  </div>
 
   <dialog id="confirm-dialog" class="confirm-dialog">
     <p id="confirm-text"></p>
@@ -67,5 +84,34 @@
       };
     })();
   </script>
+  {% if signed_in %}
+  <script>
+    // Live updates: when another phone or computer saves a change, refresh this
+    // page. If you are halfway through typing in a form, ask first instead.
+    (function () {
+      var version = {{ data_version }}, dirty = false, url = "{{ url_for('main.live_version') }}";
+      document.querySelectorAll("form[method=post]").forEach(function (form) {
+        form.addEventListener("input", function () { dirty = true; });
+        form.addEventListener("submit", function () { dirty = true; });
+      });
+      function check() {
+        if (document.hidden) return;
+        fetch(url, {cache: "no-store", credentials: "same-origin"}).then(function (r) {
+          return r.ok ? r.json() : null;
+        }).then(function (data) {
+          if (!data || data.version === version) return;
+          version = data.version;
+          if (dirty) document.getElementById("live-banner").hidden = false;
+          else location.reload();
+        }).catch(function () {});
+      }
+      setInterval(check, {{ live_interval_ms }});
+      document.addEventListener("visibilitychange", check);
+    })();
+    if ("serviceWorker" in navigator && location.protocol === "https:") {
+      navigator.serviceWorker.register("{{ url_for('main.service_worker') }}");
+    }
+  </script>
+  {% endif %}
 </body>
 </html>
