@@ -4,11 +4,12 @@ import tempfile
 from datetime import datetime
 from pathlib import Path
 
-from flask import (Blueprint, Response, current_app, flash, redirect, render_template, request,
+from flask import (Blueprint, Response, current_app, flash, jsonify, redirect, render_template, request,
                    send_file, url_for)
 
 from .. import config, db
 from ..services import people
+from .auth import admin_required
 
 bp = Blueprint("main", __name__)
 
@@ -21,6 +22,40 @@ def dashboard():
                            recent=[people.decorate(r) for r in recent],
                            birthdays=people.upcoming_birthdays(conn, days=30)[:12],
                            areas=people.area_counts(conn)[:10])
+
+
+@bp.route("/api/version")
+def live_version():
+    """A number that changes whenever members or families change (see base.html)."""
+    response = jsonify(version=db.get_db().data_version())
+    response.headers["Cache-Control"] = "no-store"
+    return response
+
+
+@bp.route("/manifest.webmanifest")
+def manifest():
+    """Lets phones and computers install the online version like an app."""
+    icon = url_for("static", filename="icon-512.png")
+    data = {
+        "name": config.APP_NAME, "short_name": "Community", "start_url": url_for("main.dashboard"),
+        "scope": "/", "display": "standalone", "background_color": "#f6f3ee", "theme_color": "#B5541C",
+        "description": f"Members, families and {config.YUVAK_MANDAL_NAME} records for {config.COMMUNITY_NAME}.",
+        "icons": [
+            {"src": url_for("static", filename="icon-192.png"), "sizes": "192x192", "type": "image/png"},
+            {"src": icon, "sizes": "512x512", "type": "image/png"},
+            {"src": url_for("static", filename="icon-maskable-512.png"), "sizes": "512x512",
+             "type": "image/png", "purpose": "maskable"},
+        ],
+    }
+    return jsonify(data), 200, {"Content-Type": "application/manifest+json"}
+
+
+@bp.route("/sw.js")
+def service_worker():
+    # The records always come from the server, so the worker caches nothing.
+    script = "self.addEventListener('install', () => self.skipWaiting());\n" \
+             "self.addEventListener('fetch', () => {});\n"
+    return Response(script, mimetype="text/javascript", headers={"Cache-Control": "no-cache"})
 
 
 @bp.route("/help")
@@ -88,7 +123,9 @@ def _saved_on_phone(saved, what):
 @bp.route("/backup", methods=["GET"])
 def backup_page():
     backups = sorted(Path(current_app.config["BACKUP_DIR"]).glob("community-*.db"), reverse=True)
-    return render_template("backup.html", backups=backups, db_path=current_app.config["DATABASE"])
+    path = current_app.config["DATABASE"]
+    return render_template("backup.html", backups=backups,
+                           db_path=None if db.is_postgres(path) else path)
 
 
 @bp.route("/backup/download")
@@ -102,6 +139,7 @@ def backup_download():
 
 
 @bp.route("/backup/restore", methods=["POST"])
+@admin_required
 def backup_restore():
     tmp = Path(tempfile.mkdtemp()) / "upload.db"
     native = current_app.config.get("NATIVE")

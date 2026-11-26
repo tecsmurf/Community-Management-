@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}My account{% endblock %}
+{% block content %}
+<form method="post" class="card form narrow">
+  <h1>Change my password</h1>
+  <p>Signed in as <b>{{ g.user.username }}</b>.</p>
+  <label>Current password<input name="current" type="password" autocomplete="current-password" required></label>
+  <label>New password (at least 8 characters)<input name="password" type="password" autocomplete="new-password" minlength="8" required></label>
+  <label>New password again<input name="password2" type="password" autocomplete="new-password" minlength="8" required></label>
+  <div class="form-actions"><button class="btn primary">Change password</button>
+    <a href="{{ url_for('main.dashboard') }}">Cancel</a></div>
+</form>
+{% endblock %}

@@ -41,6 +41,13 @@ if __name__ == "__main__":
     img = draw()
     img.resize((180, 180), Image.LANCZOS).save(ROOT / "community_manager/static/icon.png")
     img.resize((64, 64), Image.LANCZOS).save(ROOT / "community_manager/static/favicon.png")
+    # Icons for installing the online version on a phone or computer.
+    for size in (192, 512):
+        draw(size * 2).resize((size, size), Image.LANCZOS).save(ROOT / f"community_manager/static/icon-{size}.png")
+    maskable = Image.new("RGBA", (1024, 1024), SAFFRON + (255,))
+    mark = draw_mark(640)
+    maskable.paste(mark, (192, 192), mark)
+    maskable.resize((512, 512), Image.LANCZOS).save(ROOT / "community_manager/static/icon-maskable-512.png")
     img.save(ROOT / "packaging/app.ico", sizes=[(16, 16), (24, 24), (32, 32), (48, 48), (64, 64), (128, 128), (256, 256)])
     # Android app icons, named the way Briefcase expects.
     big = draw(1280)

@@ -1,0 +1,5 @@
+mobile/
+packaging/
+tests/
+*.db
+logs/

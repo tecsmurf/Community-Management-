@@ -27,6 +27,27 @@ internet, and keeps all data in a single SQLite database file on that PC.
 - Built-in Help page, and a **demo mode** (Start menu: "Community Manager (demo with sample
   data)", or `python run.py --demo`) that opens the app on made-up families kept apart from real data.
 
+## The shared online version (PC and phone together)
+
+The same app can run online so every phone and computer sees the same
+records, with changes showing on other open screens within a few seconds.
+It needs internet and a sign-in. It is set up as a Vercel project from this
+repository (`app.py` is the entry point) with a Neon PostgreSQL database, and
+these settings:
+
+| Setting | What it is |
+| --- | --- |
+| `DATABASE_URL` | Added by the Neon integration. |
+| `COMMUNITY_SECRET_KEY` | Any long random text. Keeps sign-ins safe. |
+| `COMMUNITY_SETUP_CODE` | A code you choose, used once on the Setup page to create the first admin. |
+
+To move the records from the offline PC version: download a backup on the PC
+(Backup page), sign in online as an admin and restore that file. On a phone,
+open the web address in Chrome and choose Install app to get an icon.
+
+Run the tests against PostgreSQL with
+`TEST_DATABASE_URL=postgresql://user@host/emptydb python -m pytest`.
+
 ## Installing on Windows (for the person using it)
 
 1. Get `CommunityManager-Setup.exe` (see "Building the installer" below).

@@ -9,12 +9,18 @@
   <p>Save a copy of all data to Google Drive or the phone's Downloads folder. Do this regularly. The same file can be restored on the computer version, and a computer backup can be restored here.</p>
   <a class="btn primary" href="{{ url_for('main.backup_download') }}">Save backup</a>
   {% else %}
-  <p>Download a copy of all data and keep it on a pen drive or in Google Drive. Do this regularly. The same file can be restored in the phone app.</p>
+  <p>Download a copy of all data and keep it on a pen drive or in Google Drive. Do this regularly.{% if not online %} The same file can be restored in the phone app.{% endif %}</p>
   <a class="btn primary" href="{{ url_for('main.backup_download') }}">Download backup</a>
   {% endif %}
   <a class="btn" href="{{ url_for('main.export_members') }}">Export all members to Excel (CSV)</a>
 </section>
 
+{% if online %}
+<section class="card">
+  <h2>Moving the computer's data online</h2>
+  <p>To bring records from the offline computer version into this shared version: on that computer, open <b>Backup</b> and click <b>Download backup</b>. Then choose that file below and click <b>Restore</b>.</p>
+</section>
+{% else %}
 <section class="card">
   <h2>Automatic backups</h2>
   <p>A copy is saved automatically every time the app starts. The latest {{ cfg.BACKUPS_TO_KEEP }} are kept.</p>
@@ -23,10 +29,16 @@
   <ul class="plain">{% for b in backups[:5] %}<li><code>{{ b }}</code></li>{% endfor %}</ul>
   {% endif %}
 </section>
+{% endif %}
 
+{% if not online or g.user.is_admin %}
 <section class="card">
   <h2>Restore from a backup</h2>
+  {% if online %}
+  <p class="warn">This replaces the records for everyone with the ones in the backup file. Download a backup first if you may want the current records back.</p>
+  {% else %}
   <p class="warn">This replaces all current data with the backup. The current data is saved to the automatic backups first.</p>
+  {% endif %}
   <form method="post" action="{{ url_for('main.backup_restore') }}" enctype="multipart/form-data"
         data-confirm="Replace all current data with this backup?" data-confirm-action="Restore">
     {% if native_app %}
@@ -37,4 +49,5 @@
     {% endif %}
   </form>
 </section>
+{% endif %}
 {% endblock %}

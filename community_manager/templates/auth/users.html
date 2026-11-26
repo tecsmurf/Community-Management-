@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Users{% endblock %}
+{% block content %}
+<div class="page-head"><h1>Who can sign in</h1></div>
+
+<section class="card">
+  <div class="table-scroll">
+  <table>
+    <thead><tr><th>Username</th><th>Name</th><th>Role</th><th>New password</th><th></th></tr></thead>
+    <tbody>
+    {% for u in users %}
+      <tr>
+        <td><b>{{ u.username }}</b></td>
+        <td>{{ u.full_name or '' }}</td>
+        <td>{{ 'Admin' if u.is_admin else 'Team member' }}</td>
+        <td>
+          <form method="post" action="{{ url_for('auth.reset_password', user_id=u.id) }}" class="inline-form">
+            <input name="password" type="password" minlength="8" placeholder="New password" autocomplete="new-password" required>
+            <button class="btn">Set</button>
+          </form>
+        </td>
+        <td>{% if u.id != g.user.id %}
+          <form method="post" action="{{ url_for('auth.delete_user', user_id=u.id) }}"
+                data-confirm="Remove the account {{ u.username }}? They will no longer be able to sign in." data-confirm-action="Remove">
+            <button class="btn danger">Remove</button>
+          </form>{% endif %}
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<form method="post" class="card form">
+  <h2>Add a person</h2>
+  <div class="grid">
+    <label>Name<input name="full_name" value="{{ form.full_name or '' }}"></label>
+    <label>Username *<input name="username" autocapitalize="none" value="{{ form.username or '' }}" required></label>
+    <label>Password * (at least 8 characters)<input name="password" type="password" minlength="8" autocomplete="new-password" required></label>
+  </div>
+  <label class="check"><input type="checkbox" name="is_admin" value="1"> Admin (can add and remove accounts and restore backups)</label>
+  <div class="form-actions"><button class="btn primary">Add</button></div>
+</form>
+{% endblock %}
