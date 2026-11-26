@@ -8,17 +8,25 @@ OUT=mobile-screenshots
 mkdir -p "$OUT"
 
 adb install -r "$(ls dist/*.apk | head -1)"
+# A freshly booted emulator restarts Google services for a while, and Android
+# kills apps that depend on them. Let it settle before starting.
+adb shell 'while [ "$(getprop sys.boot_completed)" != 1 ]; do sleep 2; done'
+sleep 45
 
 launch() {  # launch <path>: restart the app on the sample data, open <path>, wait for its server
   adb shell am start -S -W -n "$ACTIVITY" --ez demo true --es path "$1" >/dev/null
-  for i in $(seq 1 60); do
+  for i in $(seq 1 90); do
     sleep 2
+    if [ -z "$(adb shell pidof $APP | tr -d '\r')" ]; then
+      echo "App was stopped by the system; starting it again"
+      adb shell am start -W -n "$ACTIVITY" --ez demo true --es path "$1" >/dev/null
+    fi
     adb forward tcp:5055 tcp:5055 >/dev/null 2>&1 || true
     if curl -sf -o /dev/null http://127.0.0.1:5055/help; then return 0; fi
   done
   echo "App server did not start. App and Python lines from the log:"
   adb logcat -d > "$OUT/logcat.txt" || true
-  grep -iE "python|chaquopy|AndroidRuntime|beeware|MainActivity|community_app|FATAL|Traceback" "$OUT/logcat.txt" | tail -150
+  grep -E "python\.std|AndroidRuntime|MainActivity|FATAL|Traceback|Killing .*community_app|Process .*community_app" "$OUT/logcat.txt" | tail -150
   return 1
 }
 

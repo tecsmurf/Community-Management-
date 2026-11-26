@@ -28,6 +28,7 @@ def free_port(preferred=PREFERRED_PORT):
 
 class CommunityApp(toga.App):
     def startup(self):
+        print("Community Manager: starting", flush=True)
         start_path, demo = self._launch_options()
         data_dir = self.paths.data / "demo" if demo else self.paths.data
         data_dir.mkdir(parents=True, exist_ok=True)
@@ -49,6 +50,7 @@ class CommunityApp(toga.App):
         port = free_port()
         self.server = create_server(flask_app, host="127.0.0.1", port=port, threads=4)
         threading.Thread(target=self.server.run, daemon=True).start()
+        print(f"Community Manager: serving on port {port} (demo={demo})", flush=True)
 
         self.webview = toga.WebView(url=f"http://127.0.0.1:{port}{start_path}", style=Pack(flex=1))
         self.main_window = toga.MainWindow(title=self.formal_name)
